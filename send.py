@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import struct
 import usb1
@@ -360,7 +361,7 @@ if __name__ == '__main__':
                       time.sleep(1)
                       if DEBUG: print "custom mode set"
                       FrameReady = True
-                      FrameCounter = 1
+                      FrameCounter = 0
                   elif device.getProductID() == CustomDevice['pid']:
                     if DEBUG: print "Found '%s' in custom mode" % device.getProduct()
                     FrameReady = True
