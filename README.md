@@ -1,5 +1,7 @@
 # pyPhotoFrame
-python scipt to send images to an USB-PhotoFrame
+This python scipt can be used to send images and other web content to an Samsung USB-PhotoFrame. I use a Samsung SPF-83H but others can be used as well.
+
+
 
 # References
 ## Photo frame
