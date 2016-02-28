@@ -21,10 +21,10 @@ import HTMLParser
 StorageDevice = {"vid": 0x04e8, "pid": 0x200c}
 CustomDevice = {"vid": 0x04e8, "pid": 0x200d, "width": 800, "height": 600}
 
+ROOTDIR = "/home/henry/pyPhotoFrame"
 DEBUG = 0
 
 Sequence = [
- 
   #Webcams
   {"type":"URLIMAGE", "source": "http://www.foto-webcam.org/webcam/buchstein2/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_la.jpg", "resize": "fit"},
   {"type":"URLIMAGE", "source": "http://www.foto-webcam.eu/webcam/garland/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_la.jpg", "resize": "fit"},
@@ -32,6 +32,9 @@ Sequence = [
   {"type":"URLIMAGE", "source": "http://www.foto-webcam.eu/webcam/herzogstand/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_la.jpg", "resize": "fit"},
   {"type":"URLIMAGE", "source": "http://www.foto-webcam.eu/webcam/wank/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_la.jpg", "resize": "fit"},  
   {"type":"URLIMAGE", "source": "http://www.foto-webcam.eu/webcam/tegelberg/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_la.jpg", "resize": "fit"},
+  {"type":"URLIMAGE", "source": "http://www.foto-webcam.eu/webcam/furkajoch/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_la.jpg", "resize": "fit"},
+  {"type":"URLIMAGE", "source": "http://www.damuels-mellau.at/webcam-damuels/uga1.jpg", "resize": "fit"},
+  {"type":"URLIMAGE", "source": "http://www.addicted-sports.com/fileadmin/webcam/ammersee/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_ld.jpg", "resize": "fit"},
 
   # Cloud and Rain
   {"type":"URLIMAGE", "source": "http://www.wetteronline.de/?pid=p_sat_image&ireq=true&src=sat/vermarktung/p_sat_image/geostationary/createImages/wom/${Y}/${m}/${d}/CloudMask/BAY/${TODAY}${LASTFULLHOUR_UTC}_BAY_CloudMask.jpeg&version=0", "resize": None},
@@ -61,7 +64,6 @@ Sequence = [
 #  {"type":"URLIMAGE", "source": "http://www.dwd.de/DWD/wetter/sat/bilder/meteosat/rgb/METE_RGB_wwwCeur1500m_aktuell_m00h.png", "resize": "fit"},
 #  {"type":"URLIMAGE", "source": "http://www.dwd.de/DWD/wetter/sat/bilder/komposit/ir/KOMP_IR_wwwHammer40km_aktuell_m00s.png", "resize": "fit"},
 
-
   # RSS-Feed  
   {"type":"RSS"},
   {"type":"RSS"},
@@ -77,7 +79,7 @@ Sequence = [
   
   #Simple Clock
   {"type":"TEXT", "content": "${H}:${M}", "size": 200, "timeout": 4},
-            ]
+]
 
 context = usb1.USBContext()
 active = True
@@ -128,6 +130,13 @@ def sendJPEG(hndl, pic):
     tdata = tdata + b'\x00'
     
     try:
+      
+#      with open (ROOTDIR+"/image.jpg", "wb") as imgfile:
+#        imgfile.write(pic)
+
+#      with open (ROOTDIR+"/raw.dat", "wb") as imgfile:
+#        imgfile.write(tdata)
+        
       hndl.bulkWrite(0x02, tdata)
     except:
       pass
@@ -194,10 +203,12 @@ def ReplaceText(source):
 def sendURLJPEG(hndl, url, resizeMethod=None):
     screenSize = (CustomDevice["width"],CustomDevice["height"])
     canvas = Image.new("RGB", screenSize, "black")
+    
+    url = ReplaceText(url)
 
     if re.search(r"http", url):
 
-        request = urllib2.Request(ReplaceText(url))
+        request = urllib2.Request(url)
         request.add_header('User-agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0')
 
         try: 
@@ -208,7 +219,7 @@ def sendURLJPEG(hndl, url, resizeMethod=None):
                 result = response.read()
                 image = Image.open(StringIO.StringIO(result))
             else:
-                image = Image.new("RGB",(100, 100), "red");    
+                return False;
         except urllib2.HTTPError as e:
             print 'The server couldn\'t fulfill the request.'+url
             print 'Error code: ', e.code
@@ -236,17 +247,23 @@ def sendURLJPEG(hndl, url, resizeMethod=None):
 def sendText(hdnl, content, fontsize):
     screenSize = (CustomDevice["width"],CustomDevice["height"])
     canvas = Image.new("RGB", screenSize, "black")
-    draw = ImageDraw.Draw(canvas)
 
     fontFace = "OpenSans"
-    fontType = "Regular"
+    fontType = "Light"
     
     content = ReplaceText(content)
     
-    TextFont=ImageFont.truetype("fonts/"+fontFace+"-"+fontType+".ttf", fontsize)
-    textsize = TextFont.getsize(content)
-    draw.text( ( (CustomDevice["width"] - textsize[0])/2, (CustomDevice["height"] - textsize[1])/2), content, font=TextFont, fill="#ddd")
-    del draw    
+    TextFont=ImageFont.truetype(ROOTDIR+"/fonts/"+fontFace+"-"+fontType+".ttf", fontsize)
+    text = Image.Image()._new(TextFont.getmask(content, mode="L"))
+    canvas.paste("#ddd", ( (CustomDevice["width"]-text.size[0])/2,(CustomDevice["height"]-text.size[1])/2), text)
+
+#    draw = ImageDraw.Draw(canvas)
+#    textsize = TextFont.getsize(content)
+#    print(textsize)
+#    draw.text( ( 0, 0), content, font=TextFont, fill="#ddd")
+#    draw.line([(0, 0), (100,100)], fill="#ddd", width=2)
+#    draw.text( ( (CustomDevice["width"] - textsize[0])/2, (CustomDevice["height"] - textsize[1])/2), content, font=TextFont, fill="#ddd")
+#    del draw    
     
     output = StringIO.StringIO()
     canvas.save(output, "JPEG", quality=94)
@@ -263,9 +280,9 @@ def sendRSSItem(hdnl, item):
     fontFace = "OpenSans"
     fontType = "Regular"
     
-    HeaderFont=ImageFont.truetype("fonts/"+fontFace+"-"+fontType+".ttf", 50)
-    TextFont=ImageFont.truetype("fonts/"+fontFace+"-"+fontType+".ttf", 35)
-    SmallFont=ImageFont.truetype("fonts/"+fontFace+"-"+fontType+".ttf", 20)
+    HeaderFont=ImageFont.truetype(ROOTDIR+"/fonts/"+fontFace+"-"+fontType+".ttf", 50)
+    TextFont=ImageFont.truetype(ROOTDIR+"/fonts/"+fontFace+"-"+fontType+".ttf", 35)
+    SmallFont=ImageFont.truetype(ROOTDIR+"/fonts/"+fontFace+"-"+fontType+".ttf", 20)
 
     hasimage = False
     if hasattr(item, 'links'):
