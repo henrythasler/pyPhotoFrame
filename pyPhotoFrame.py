@@ -29,7 +29,6 @@ class DownloadThread:
     self.settings = settings
     self.debugActive = settings.debug
 
-    self.item = 42
     self.data = {
         'T_IN': 0.0,
         'T_OUT': 0.0
@@ -61,7 +60,6 @@ class DownloadThread:
         self.data['T_IN'] = float(json.loads(msg.payload)['value'])
       
       #self.debug('on_message: '+str(self.item))
-      self.item = self.item+1
       #print(msg.topic+" "+msg.payload)
   #    ext_temperature = json.loads(msg.payload)
       #print(" "+str(ext_temperature))

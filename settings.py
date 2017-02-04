@@ -10,7 +10,9 @@ OUTDIR = "/home/henry/pyPhotoFrame/html"
 # from: https://github.com/mecrazy/phantomjs-binaries
 PHANTOMJS = "/home/henry/pyPhotoFrame/phantomjs-2.1.1-linux-armhf/phantomjs-2.1.1-linux-armhf"
 
-debug = True
+debug = False
+
+BrokerURL = '127.0.0.1'
 
 StorageDevice = {"vid": 0x04e8, "pid": 0x200c}
 CustomDevice = {"vid": 0x04e8, "pid": 0x200d, "width": 800, "height": 600}
@@ -27,36 +29,19 @@ test = [
   {
    "id": autoid(), 
    "type":"website", 
-   "source": "http://127.0.0.1:3000/MMR?hide_opts=1", 
-   "resize": None, 
+   "source": "file:///"+ROOTDIR+"/index.html?hour=${H}&minute=${M}&temp_in=${T_IN}&temp_out=${T_OUT}", 
+   "resize": None,
    "skip": False,
-   "timeout": 10,
+   "timeout": 8,
    "refresh": 60,
    },
-  {
-    "id": autoid(), 
-    "type":"urlimage", 
-    "source": "https://maps.googleapis.com/maps/api/staticmap?center=48.24,11.20&key=%20AIzaSyBb38gkS8iTlJMawh4eU5po5j-BmoqCbO0&size=400x300&zoom=9&scale=2", 
-    "resize": "fit",
-    "timeout": 10,
-    "refresh": 600,
-    "schedule": {
-      "0": "13-15",
-      "1": "6-8",
-      "2": "6-8",
-      "3": "6-8",
-      "4": "6-8",
-      "5": "6-8",
-      "6": "6-8",
-      }
-  },
   {
     "id": autoid(), 
     "type":"urlimage", 
     "source": "/home/henry/pyLogger/out.png", 
     "resize": None,
     "timeout": 10,
-    "refresh": 60,
+    "refresh": 600,
   },
 ]
 
@@ -134,7 +119,14 @@ sequence = [
   {
     "id": autoid(), 
     "type":"urlimage", 
-    "source": "https://www.addicted-sports.com/fileadmin/webcam/ammersee/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_ld.jpg", 
+    "source": "http://www.addicted-sports.com/fileadmin/webcam/ammersee/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_ld.jpg", 
+    "resize": "fit",
+    "refresh": 600,
+  },
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "http://www.addicted-sports.com/fileadmin/webcam/starnbergersee/${Y}/${m}/${d}/${LASTFULLTHIRTYMINUTES}_ld.jpg", 
     "resize": "fit",
     "refresh": 600,
   },
@@ -164,6 +156,13 @@ sequence = [
     "type":"urlimage", 
     "source": "https://www.foto-webcam.eu/webcam/herzogstand/current/720.jpg", 
     "resize": "fit", 
+    "refresh": 600,
+  },
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "http://www.addicted-sports.com/fileadmin/webcam/walchensee/${Y}/${m}/${d}/${LASTFULLTHIRTYMINUTES}_ld.jpg", 
+    "resize": "fit",
     "refresh": 600,
   },
   {
