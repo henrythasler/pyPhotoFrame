@@ -8,11 +8,11 @@ OUTDIR = "/home/henry/pyPhotoFrame/html"
 #PHANTOMJS = "/home/henry/jsPhotoFrame/phantomjs-armv7/bin/phantomjs"
 
 # from: https://github.com/mecrazy/phantomjs-binaries
-PHANTOMJS = "/home/henry/pyPhotoFrame/phantomjs-2.1.1-linux-armhf/phantomjs-2.1.1-linux-armhf"
+PHANTOMJS = "/home/henry/pyPhotoFrame/phantomjs-2.1.1/phantomjs-2.1.1-linux-armhf"
 
 debug = False
 
-BrokerURL = '127.0.0.1'
+BrokerURL = 'localhost'
 
 StorageDevice = {"vid": 0x04e8, "pid": 0x200c}
 CustomDevice = {"vid": 0x04e8, "pid": 0x200d, "width": 800, "height": 600}

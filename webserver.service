@@ -1,0 +1,11 @@
+[Unit]
+Description=webserver
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /usr/lib/node_modules/http-server/bin/http-server /home/henry/pyPhotoFrame/html/ -p 80 -s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

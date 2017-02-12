@@ -1,0 +1,11 @@
+[Unit]
+Description=pyDisplayImage
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/henry/pyPhotoFrame/pyDisplayImage.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

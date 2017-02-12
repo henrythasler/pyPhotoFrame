@@ -162,8 +162,10 @@ class DownloadThread:
       except:  
         self.debug('Other Error: '+url)
         return False
-    else:
+    elif os.path.exists(url):
       image = Image.open(url)
+    else:
+      return False
     
     with io.BytesIO() as output:
       image.convert("RGB").save(output, "JPEG", quality=94)
@@ -189,6 +191,7 @@ class DownloadThread:
       try: 
         res = subprocess.call([self.settings.PHANTOMJS,self.settings.ROOTDIR+"/capture.js", url, item["element"]]) 
       except:
+        self.debug('PHANTOMJS Error')
         pass    
     else: 
       self.debug('whole page')
