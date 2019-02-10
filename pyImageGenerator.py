@@ -16,6 +16,7 @@ import subprocess
 import os
 import paho.mqtt.client as mqtt
 import json
+import socket
 
 
 seconds = lambda: int(round(time.time()))
@@ -25,6 +26,9 @@ class DownloadThread:
     self.settings = settings
     self.active = True
     self.idletime = 1
+    self.lastConnectionCheck = 0
+    self.connected = False
+    self.topics = []
 
     self.sensordata = {
         'T_IN': 0.0,
@@ -32,6 +36,10 @@ class DownloadThread:
         }
 
     #setup mqtt stuff
+    for item in self.settings.sequence:
+        if item["type"] == 'mqttimage':
+            self.topics.append(item)
+    
     self.client = mqtt.Client('pyImageGenerator-%s' % os.getpid())
     self.client.on_connect = self.on_connect
     self.client.on_message = self.on_message
@@ -47,6 +55,15 @@ class DownloadThread:
       except:
         pass
 
+  def is_connected(self, hostname):
+    try:
+      host = socket.gethostbyname(hostname)
+      s = socket.create_connection((host, 80), 2)
+      return True
+    except:
+      pass
+    return False
+
   # The callback for when the client receives a CONNACK response from the server.
   def on_connect(self, client, userdata, flags, rc):
     self.debug("Connected to mqtt broker with result code "+str(rc))
@@ -56,20 +73,33 @@ class DownloadThread:
     client.subscribe("home/out/temp")
     client.subscribe("home/in/temp")
     client.subscribe("home/display/active")
+    for topic in self.topics:
+        client.subscribe(topic["source"])
 
   # The callback for when a PUBLISH message is received from the server.
   def on_message(self, client, userdata, msg):
-    if msg.topic == 'home/out/temp':
+    if msg.topic.startswith('home/out/temp'):
       self.sensordata['T_OUT'] = float(json.loads(msg.payload)['value'])
       
-    if msg.topic == 'home/in/temp':
+    elif msg.topic.startswith('home/in/temp'):
       self.sensordata['T_IN'] = float(json.loads(msg.payload)['value'])
 
-    if msg.topic == 'home/display/active':
+    elif msg.topic.startswith('home/display/active'):
       self.active = msg.payload.lower() in ('1', '1.0', 'true', 'on', 'active')
       self.idletime = 1
       
-    self.debug(msg.topic + ': ' + msg.payload);
+    else:
+        for topic in self.topics:
+            if msg.topic.startswith(topic["source"]):
+                self.debug(topic["source"])
+                buffer = io.BytesIO(msg.payload)
+                img = Image.open(buffer)
+                screenSize = (self.settings.CustomDevice["width"],self.settings.CustomDevice["height"])
+                img = self.ResizeImage(img, screenSize, topic["resize"])
+                img.convert("RGB").save(self.settings.OUTDIR+"/"+topic["id"]+".jpg", "JPEG", quality=94)
+                
+    
+    #self.debug(msg.topic + ': ' + msg.payload);
 
 
   def ResizeImage(self, image, screenSize, method):
@@ -141,11 +171,15 @@ class DownloadThread:
     if re.search(r"http", url):
       request = urllib2.Request(url)
       request.add_header('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0')
+      if 'header' in item:
+          for key, value in item["header"].iteritems():
+              self.debug('Adding header ' + key + ": " + value)
+              request.add_header(key, value)
 
       try: 
         response = urllib2.urlopen(request, timeout = 5)
         headers = response.info()
-#        print headers
+        #print headers
         if re.search(r"image", headers.getheader('Content-Type')):
           result = response.read()
           image = Image.open(StringIO.StringIO(result))
@@ -159,6 +193,8 @@ class DownloadThread:
         self.debug('We failed to reach a server: '+url)
         self.debug(e.reason)
         return False
+      except (KeyboardInterrupt, SystemExit):
+        pass
       except:  
         self.debug('Other Error: '+url)
         return False
@@ -190,6 +226,8 @@ class DownloadThread:
       self.debug('element "'+ item["element"] + '"found')
       try: 
         res = subprocess.call([self.settings.PHANTOMJS,self.settings.ROOTDIR+"/capture.js", url, item["element"]]) 
+      except (KeyboardInterrupt, SystemExit):
+        pass
       except:
         self.debug('PHANTOMJS Error')
         pass    
@@ -227,24 +265,32 @@ class DownloadThread:
     # wait for MQTT-Sensordata
     time.sleep(.2)    
     
+
     while True:
       if self.active:
+        if seconds() - self.lastConnectionCheck > 30: 
+            self.connected = self.is_connected("www.heise.de")
         for item in self.settings.sequence:
-          if (seconds() - item["last_refresh"]) > item["refresh"]:
-            
-            if item["type"] == 'urlimage':
-              res = self.getImage(item)
-            elif item["type"] == 'website':
-              res = self.getWebsite(item)
-            else:  
-              # ignore unknown items
-              res = True
+          if self.connected or "http" not in item["source"]:
+            if (seconds() - item["last_refresh"]) > item["refresh"]:
+              if item["type"] == 'urlimage':
+                res = self.getImage(item)
+              elif item["type"] == 'website':
+                res = self.getWebsite(item)
+              elif item["type"] == 'mqttimage':
+                res = True
+              else:  
+                # ignore unknown items
+                self.debug("Unknown"+item["type"])
+                res = True
               
               
-            if res == True:  
-              item["last_refresh"] = seconds()
-            else:
-              self.debug("Error downloading " + item["source"])
+              if res == True:  
+                item["last_refresh"] = seconds()
+              else:
+                self.debug("Error downloading " + item["source"])
+          else:
+              self.debug("No internet connection " + item["source"])
       else:
         self.debug('sleeping...')
         self.idletime = 5

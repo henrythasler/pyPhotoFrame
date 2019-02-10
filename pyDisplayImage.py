@@ -116,15 +116,26 @@ class DisplayThread:
 
     if do_display:
       screenSize = (self.settings.CustomDevice["width"], self.settings.CustomDevice["height"])
-      canvas = Image.new("RGB", screenSize, "black")
+      
+      if "background" in item:
+          try:
+            canvas = Image.open(item["background"])
+          except:
+            canvas = Image.new("RGB", screenSize, "black")
+      else:     
+        canvas = Image.new("RGB", screenSize, "black")
+        
       res = True
       
-      url = self.settings.OUTDIR+"/"+item["id"]+".jpg"
+      if ("direct" in item) and (item["direct"] == True):
+        url = item["source"]
+      else:  
+        url = self.settings.OUTDIR+"/"+item["id"]+".jpg"
 
       if os.access(url, os.F_OK):
         self.debug("Display: " + url)
         self.debug(item)
-        if (seconds() - os.stat(url).st_mtime) > item["refresh"]:
+        if not ("direct" in item) and ((seconds() - os.stat(url).st_mtime) > item["refresh"]):
           self.debug("File outdated: " + url)
           res = False
         else:
@@ -164,7 +175,7 @@ class DisplayThread:
         self.context = usb1.USBContext()
         deviceList = self.context.getDeviceList(skip_on_error=True)
         for device in deviceList:
-#          self.debug(device)
+          #self.debug(device)
           if device.getVendorID() == self.settings.StorageDevice['vid']:
             if device.getProductID() == self.settings.StorageDevice['pid']:
               self.debug("Found '%s' in storage mode" % device.getProduct())

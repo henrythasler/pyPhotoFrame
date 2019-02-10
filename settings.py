@@ -26,23 +26,15 @@ def autoid():
 
 # https://docs.python.org/2/tutorial/datastructures.html#dictionaries
 test = [
-  {
-   "id": autoid(), 
-   "type":"website", 
-   "source": "file:///"+ROOTDIR+"/index.html?hour=${H}&minute=${M}&temp_in=${T_IN}&temp_out=${T_OUT}", 
-   "resize": None,
-   "skip": False,
-   "timeout": 8,
-   "refresh": 60,
-   },
+  # Greenhouse Chart
   {
     "id": autoid(), 
     "type":"urlimage", 
-    "source": "/home/henry/pyLogger/out.png", 
+    "source": "http://omv4:3000/render/d-solo/GwAekcumz/greenhouse?panelId=2&orgId=1&from=now-24h&to=now&tab=general&width=1000&height=500&tz=Europe%2FBerlin", 
+    "header": {"Authorization": "Bearer eyJrIjoidFhwT2ViRERCNlNEUzJDMTdXT3ZZYjdzdXJ6ZDd4QjAiLCJuIjoidmlld2VyIiwiaWQiOjF9"},
     "resize": None,
-    "timeout": 10,
     "refresh": 600,
-  },
+  }
 ]
 
 id = 0
@@ -66,27 +58,15 @@ sequence = [
     "resize": None,
     "refresh": 600,
   },
-  
-  # Train
+  # Greenhouse Chart
   {
-   "id": autoid(), 
-   "type":"website", 
-   "source": "http://127.0.0.1:3000/MMR?hide_opts=1", 
-   "resize": None, 
-   "skip": False,
-   "timeout": 8,
-   "refresh": 60,
-    "schedule": {
-      "0": "13-17",
-      "1": "6-8",
-      "2": "6-8",
-      "3": "6-8",
-      "4": "6-8",
-      "5": "6-8",
-      "6": "13-17",
-      },
-   },
-   
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "http://omv4:3000/render/d-solo/GwAekcumz/greenhouse?panelId=2&orgId=1&from=now-24h&to=now&tab=general&width=800&height=400&tz=Europe%2FBerlin", 
+    "header": {"Authorization": "Bearer eyJrIjoidFhwT2ViRERCNlNEUzJDMTdXT3ZZYjdzdXJ6ZDd4QjAiLCJuIjoidmlld2VyIiwiaWQiOjF9"},
+    "resize": None,
+    "refresh": 600,
+  },
   # Traffic
   {
    "id": autoid(), 
@@ -107,12 +87,34 @@ sequence = [
       }
    },
 
+  # Sonos Status
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "direct": True,
+    "source": "/home/henry/pySonos/album.jpg", 
+    "resize": None, 
+    "refresh": 60,
+
+  },
+
+
+  # Roomba livemap
+  {
+   "id": autoid(), 
+   "type":"mqttimage", 
+   "source": "home/roomba/state/livepath", 
+   "resize": "fit", 
+   "refresh": 3600000,
+   },
+
 
   #Webcams
   {
     "id": autoid(), 
     "type":"urlimage", 
     "source": "https://www.foto-webcam.eu/webcam/peissenberg/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit", 
     "refresh": 600,
   },
@@ -120,6 +122,7 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "http://www.addicted-sports.com/fileadmin/webcam/ammersee/${Y}/${m}/${d}/${LASTFULLTENMINUTES}_ld.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit",
     "refresh": 600,
   },
@@ -127,6 +130,7 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "http://www.addicted-sports.com/fileadmin/webcam/starnbergersee/${Y}/${m}/${d}/${LASTFULLTHIRTYMINUTES}_ld.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit",
     "refresh": 600,
   },
@@ -134,6 +138,7 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "https://www.foto-webcam.eu/webcam/wendelstein-ost/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit", 
     "refresh": 600,
   },
@@ -141,6 +146,7 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "https://www.foto-webcam.eu/webcam/garland/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit", 
     "refresh": 600,
   },
@@ -148,6 +154,7 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "https://www.foto-webcam.eu/webcam/kochelsee/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit", 
     "refresh": 600,
   },  
@@ -155,6 +162,7 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "https://www.foto-webcam.eu/webcam/herzogstand/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit", 
     "refresh": 600,
   },
@@ -162,13 +170,15 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "http://www.addicted-sports.com/fileadmin/webcam/walchensee/${Y}/${m}/${d}/${LASTFULLTHIRTYMINUTES}_ld.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit",
     "refresh": 600,
   },
   {
     "id": autoid(), 
     "type":"urlimage", 
-    "source": "https://www.foto-webcam.eu/webcam/wank/current/720.jpg", 
+    "source": "https://www.foto-webcam.eu/webcam/zugspitze-ost/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit",
     "refresh": 600,
   },  
@@ -176,18 +186,35 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "https://www.foto-webcam.eu/webcam/tegelberg/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit",
     "refresh": 600,
   },
   {
     "id": autoid(), 
     "type":"urlimage", 
-    "source": "https://www.foto-webcam.eu/webcam/furkajoch/current/720.jpg", 
+    "source": "http://livecam.jaegeralpe.at/jaegeralpe2.jpg", 
+    "background": "/home/henry/pySonos/background.png",
     "resize": "fit", 
     "refresh": 600,
   },
-
-
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "https://www.foto-webcam.eu/webcam/koerbersee/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
+    "resize": "fit", 
+    "refresh": 600,
+  },
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "https://www.foto-webcam.eu/webcam/furkajoch/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
+    "resize": "fit", 
+    "refresh": 600,
+  },
+  
   # Cloud and Rain
   {
     "id": autoid(), 
@@ -239,20 +266,6 @@ sequence = [
     "id": autoid(), 
     "type":"urlimage", 
     "source": "http://www.wetteronline.de/?daytime=day&diagram=true&fcdatstr=${TODAY}&iid=BAY&pid=p_city_local&sid=Pictogram", 
-    "resize": None,
-    "refresh": 3600,
-  },
-  {
-    "id": autoid(), 
-    "type":"urlimage", 
-    "source": "http://www.wetteronline.de/?daytime=day&diagram=true&fcdatstr=${TOMORROW}&iid=BAY&pid=p_city_local&sid=Pictogram", 
-    "resize": None,
-    "refresh": 3600,
-  },
-  {
-    "id": autoid(), 
-    "type":"urlimage", 
-    "source": "http://www.wetteronline.de/?daytime=day&diagram=true&fcdatstr=${DAYAFTERTOMORROW}&iid=BAY&pid=p_city_local&sid=Pictogram", 
     "resize": None,
     "refresh": 3600,
   },
@@ -313,7 +326,54 @@ backup = [
     "refresh": 600,
   },
 
+  # Train
+  {
+   "id": autoid(), 
+   "type":"website", 
+   "source": "http://127.0.0.1:3000/MMR?hide_opts=1", 
+   "resize": None, 
+   "skip": True,
+   "timeout": 8,
+   "refresh": 60,
+    "schedule": {
+      "0": "13-17",
+      "1": "6-8",
+      "2": "6-8",
+      "3": "6-8",
+      "4": "6-8",
+      "5": "6-8",
+      "6": "13-17",
+      },
+   },
+  
+  # Kicktipp
+  {
+    "id": autoid(), 
+    "type":"website", 
+    "source": "https://www.kicktipp.de/miezen/tippuebersicht", 
+    "element": "ranking", 
+    "resize": "fit", 
+    "refresh": 60,
+  },
+     
+   
   #Webcams
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "https://www.foto-webcam.eu/webcam/feldkopf/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
+    "resize": "fit", 
+    "refresh": 600,
+  },
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "https://www.foto-webcam.eu/webcam/freiwandeck/current/720.jpg", 
+    "background": "/home/henry/pySonos/background.png",
+    "resize": "fit", 
+    "refresh": 600,
+  },
   {
     "id": autoid(), 
     "type":"urlimage", 
@@ -363,7 +423,20 @@ backup = [
     "resize": "fit",
     "refresh": 600,
   },
-
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "http://www.wetteronline.de/?daytime=day&diagram=true&fcdatstr=${TOMORROW}&iid=BAY&pid=p_city_local&sid=Pictogram", 
+    "resize": None,
+    "refresh": 3600,
+  },
+  {
+    "id": autoid(), 
+    "type":"urlimage", 
+    "source": "http://www.wetteronline.de/?daytime=day&diagram=true&fcdatstr=${DAYAFTERTOMORROW}&iid=BAY&pid=p_city_local&sid=Pictogram", 
+    "resize": None,
+    "refresh": 3600,
+  },
   # RSS-Feed  
   {
     "id": autoid(), 
