@@ -5,13 +5,13 @@ import settings
 import time
 from datetime import datetime, timedelta
 import usb1
-import Image, ImageDraw, ImageFilter, ImageFont
-import StringIO
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from io import BytesIO
 import struct
 import csv
 import string
 import re
-import urllib2
+#import urllib2
 import subprocess
 import os
 import paho.mqtt.client as mqtt
@@ -43,7 +43,7 @@ class DisplayThread:
     
   def debug(self, message):
     if self.settings.debug:
-      print datetime.now().strftime("%H:%M") + ' ' + str(message)
+      print(datetime.now().strftime("%H:%M") + ' ' + str(message))
 
       
   # The callback for when the client receives a CONNACK response from the server.
@@ -73,7 +73,8 @@ class DisplayThread:
       hndl.controlWrite(        0x80,           0x06,       0xfe,   0xfe,   b'\x00'*254,1000)
 #          controlWrite(self,   request_type,   request,    value,  index,  data,       timeout=0):
     except:  
-      pass
+      self.debug("setCustomMode() error")
+#      pass
     return True
 
 
@@ -95,7 +96,8 @@ class DisplayThread:
     try:
       hndl.bulkWrite(0x02, tdata)
     except:
-      pass      
+      self.debug("error in sendJPEG()")
+#      pass      
       
       
   def sendImage(self, hndl, item):
@@ -154,10 +156,11 @@ class DisplayThread:
         image.paste("#ddd", (0,0), text)
 
       try:
-        canvas.paste(image, ( (self.settings.CustomDevice["width"]-image.size[0])/2,(self.settings.CustomDevice["height"]-image.size[1])/2))
-      except:
-        pass
-      output = StringIO.StringIO()
+        canvas.paste(image, ( int((self.settings.CustomDevice["width"]-image.size[0])/2),int((self.settings.CustomDevice["height"]-image.size[1])/2)))
+      except(e):
+        self.debug(e)
+#        pass
+      output = BytesIO()
       canvas.save(output, "JPEG", quality=94)
       
       pic  = output.getvalue()
@@ -209,7 +212,7 @@ class DisplayThread:
               # set short timeout
               self.display_next = seconds() + 1
               if "skip" in seqItem:
-                if seqItem["skip"] <> False:
+                if seqItem["skip"] != False:
                   self.FrameCounter += 1
               else:
                 self.FrameCounter += 1
